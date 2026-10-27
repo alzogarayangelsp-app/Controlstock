@@ -112,7 +112,7 @@
       </div>
     </header>
 
-    <!-- BARRA DE ESCÁNER (LÁSER Y CÁMARA CELULAR) -->
+    <!-- BARRA DE ESCÁNER -->
     <div class="bg-slate-900 border-b border-slate-800 p-3 shadow-inner">
       <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center gap-3">
         <!-- Selector de Modo -->
@@ -125,7 +125,7 @@
           </button>
         </div>
 
-        <!-- Input Léctor Láser USB + Botón Cámaras Celular -->
+        <!-- Input Lector Láser USB + Botón Cámara Celular -->
         <div class="relative w-full flex items-center gap-2">
           <input type="text" id="input-scanner" onkeydown="procesarEscaneoLaser(event)" placeholder="Escaneá el código aquí o presioná Cámara..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-cyan-400 placeholder-slate-500 font-mono focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition">
           <button onclick="abrirCamaraModal()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 text-xs font-bold px-3 py-2.5 rounded-xl transition flex items-center gap-1.5 shrink-0">
@@ -614,13 +614,25 @@
         html5QrCodeScanner = new Html5Qrcode("qr-reader");
       }
 
-      const config = { fps: 10, qrbox: { width: 250, height: 150 } };
+      // Configuración ampliada para aceptar códigos de barras lineales (EAN, Code128, etc.) además de QR
+      const config = { 
+        fps: 10, 
+        qrbox: { width: 280, height: 150 },
+        formatsToSupport: [ 
+          Html5QrcodeSupportedFormats.QR_CODE,
+          Html5QrcodeSupportedFormats.EAN_13,
+          Html5QrcodeSupportedFormats.EAN_8,
+          Html5QrcodeSupportedFormats.CODE_128,
+          Html5QrcodeSupportedFormats.CODE_39,
+          Html5QrcodeSupportedFormats.UPC_A,
+          Html5QrcodeSupportedFormats.UPC_E
+        ]
+      };
       
       html5QrCodeScanner.start(
         { facingMode: "environment" }, 
         config, 
         (decodedText) => {
-          // Éxito al leer código por cámara
           cerrarCamaraModal();
           procesarCodigoEscaneado(decodedText);
         },
@@ -840,12 +852,12 @@
     }
 
     async function guardarConfiguracion() {
-      const nuevoNombre = document.getElementById("cfg-empresa-nombre").value.trim();
+      const nuevoName = document.getElementById("cfg-empresa-nombre").value.trim();
       const nuevaPass = document.getElementById("cfg-user-pass").value.trim();
 
       if (!nuevaPass) return showToast("La clave no puede estar vacía", "error");
 
-      configApp.nombreEmpresa = nuevoNombre || "Mi Negocio";
+      configApp.nombreEmpresa = nuevoName || "Mi Negocio";
       configApp.userPass = nuevaPass;
 
       try {
